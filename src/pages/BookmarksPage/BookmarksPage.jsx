@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/api"; // Axios helper
+import api from "../../api/api";// Axios helper
 
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState([]); //bookmarks, the current state value (an array of bookmarks)
