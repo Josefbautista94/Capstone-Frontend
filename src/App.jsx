@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import BookmarksPage from "./pages/BookmarksPage";
+import BookmarksPage from "./pages/BookmarksPage/BookmarksPage";
 
 function App() {
   return (
@@ -12,3 +12,4 @@ function App() {
 }
 
 export default App;
+ 
