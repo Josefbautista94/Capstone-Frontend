@@ -1,3 +1,7 @@
-.body{
-    background-color: black;
+body {
+  background-color: #1e1e1e; /* dark grey */
+  color: #f0f0f0; /* optional: light text for contrast */
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
 }

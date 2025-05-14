@@ -1,0 +1,10 @@
+.map-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.leaflet-container {
+  flex: 1;
+  width: 100%;
+}
