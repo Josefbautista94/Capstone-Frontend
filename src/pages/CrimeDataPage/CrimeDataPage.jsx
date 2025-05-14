@@ -8,7 +8,7 @@ export default function CrimeDataPage() { // defining a react functional compone
   useEffect(() => { // useEffect lets us run side effects like API calls after render
     nycCrimeApi.get("", {
       params: {
-        $limit: 100,
+        $limit: 500,
         $order: "rpt_dt DESC",
         $where: "latitude IS NOT NULL AND longitude IS NOT NULL",
         $select: "cmplnt_num,boro_nm,rpt_dt,ofns_desc,law_cat_cd,crm_atpt_cptd_cd,prem_typ_desc,latitude,longitude"
