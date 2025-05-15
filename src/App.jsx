@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import BookmarksPage from "./pages/BookmarksPage/BookmarksPage";
 import Nav from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
+import Home from "./pages/HomePage/Homepage"; 
 import CrimeDataPage from "./pages/CrimeDataPage/CrimeDataPage";
 import MapPage from "./pages/MapPage/MapPage";
 import InsightsPage from "./pages/InsightsPage/InsightsPage";
@@ -12,6 +13,7 @@ function App() {
     <Router>
       <Nav />
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path="/crime" element={<CrimeDataPage />} />
         <Route path="/bookmarks" element={<BookmarksPage />} />
         <Route path="/map" element={<MapPage />} />
