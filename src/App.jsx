@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import BookmarksPage from "./pages/BookmarksPage/BookmarksPage";
 import Nav from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
-import Home from "./pages/HomePage/Homepage"; 
+import Home from "./pages/HomePage/HomePage"; 
 import CrimeDataPage from "./pages/CrimeDataPage/CrimeDataPage";
 import MapPage from "./pages/MapPage/MapPage";
 import InsightsPage from "./pages/InsightsPage/InsightsPage";

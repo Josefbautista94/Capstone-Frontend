@@ -6,6 +6,8 @@
   flex-direction: column;
   justify-content: center; /* vertical centering */
   align-items: center;
+    animation: fadeIn 1s ease;
+
 }
 
 
@@ -26,6 +28,20 @@
   font-size: 1.1rem;
   line-height: 2;
 }
+
+.home-container .personal-branding {
+  font-size: 0.9rem;
+  margin-top: 3rem;
+  opacity: 0.6;
+}
+
+.coming-soon{
+    margin-top: 2rem;
+    opacity: 0.7;
+
+}
+
+
  /* For Phones! */
 @media (max-width: 600px) {
   .home-container {
@@ -43,5 +59,37 @@
   .feature-list {
     font-size: 1rem;
     text-align: center;
+  }
+
+    .home-container .personal-branding {
+    font-size: 0.8rem;
+    padding: 0 1rem;
+  }
+
+  .coming-soon {
+    font-size: 0.9rem;
+    padding: 0 1rem;
+  }
+}
+
+
+
+/* 
+  This animation smoothly fades in an element by:
+  - Starting fully transparent (opacity: 0)
+  - Slightly offsetting it downward (translateY(10px))
+  - Then transitioning it to full opacity and original position
+  Useful for making elements gracefully appear on load.
+*/
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; /* Start fully transparent */
+    transform: translateY(10px);  /* Slight downward shift */
+  }
+  to {
+    opacity: 1; /* Fully visible */
+    transform: translateY(0);  /* Return to original position */
   }
 }
