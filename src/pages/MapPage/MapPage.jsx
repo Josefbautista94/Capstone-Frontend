@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"; //These are core map components from React Leaflet. I use MapContainer as the base map, TileLayer for the actual map visuals, and then Marker and Popup to place and describe each crime.
 import nycCrimeApi from "../../api/nycCrimeApi";
+import api from "../../api/api"; // backend Axios instance
 import L from "leaflet"; // This lets me patch Leaflet’s default marker icon paths, which don’t work in Vite out of the box. Without this fix, the pins on the map wouldn't appear.
 import "leaflet/dist/leaflet.css"; // Leaflet needs its own CSS file to display the map properly, so I load that globally.
 import "./MapPage.css";
@@ -49,7 +50,37 @@ export default function MapPage() {
           console.error("There was an error fetching the crime data:", err) // If the request fails, log it so I know what went wrong.
       )
       .finally(() => setLoading(false)); // No matter what (success or fail), this runs at the end
-  },[]);
+  }, []);
+
+  const handleBookmark = (crime) => {
+    // When a user clicks ‘Bookmark This,’ I pass in that specific crime object to this function.
+    const payload = {
+      // This creates the data object we're going to send to the backend.
+      // Each field maps to what the /api/bookmarks backend expects:
+      cmplntNum: crime.cmplnt_num, // cmplntNum comes directly from the crime object
+      boroNm: crime.boro_nm,
+      ofnsDesc: crime.ofns_desc,
+      lawCatCd: crime.law_cat_cd,
+      pdDesc: "N/A", // not included in the public API data, so we just send "N/A" for now
+      latitude: parseFloat(crime.latitude), // latitude & longitude: converted from strings to numbers using parseFloat()
+      longitude: parseFloat(crime.longitude),
+      notes: "", // could later build a form to let users add custom notes
+    };
+    api
+      .post("bookmarks", payload) // Sends a POST request to your backend at /api/bookmarks with the data we just built
+      .then(() => alert("🔖 Bookmarked Successfully! 👍🏼")) // If the POST is successful, show a popup message to the user confirming it worked
+      .catch((err) => {
+        if (err.response?.status === 409) { // 409 Conflict: means the crime is already in your database, cmplntNum is unique
+          alert("You already bookmarked this.");
+        } else {
+          console.error(
+            "There was an error trying to bookmark the crime:",
+            err
+          );
+          alert("Failed to bookmark.");
+        }
+      });
+  };
 
   return (
     <div className="map-wrapper">
@@ -90,6 +121,9 @@ export default function MapPage() {
                   {crime.boro_nm} — {crime.rpt_dt?.slice(0, 10)}
                   <br />
                   {crime.crm_atpt_cptd_cd}
+                  <button onClick={() => handleBookmark(crime)}>
+                    📌 Bookmark This
+                  </button>
                 </Popup>
               </Marker>
             )
