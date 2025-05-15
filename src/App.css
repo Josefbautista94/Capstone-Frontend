@@ -1,8 +1,22 @@
-body {
-  background-color: #1e1e1e; /* dark grey */
-  color: #f0f0f0; /* optional: light text for contrast */
+/* Ensure full height layout and styling */
+html, body, #root {
+  height: 100%;
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
 }
 
+/* Body baseline styles (you already had this) */
+body {
+  background-color: #1e1e1e; /* dark grey */
+  color: #f0f0f0;            /* light text */
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Root wrapper takes full height and allows flex growth */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
