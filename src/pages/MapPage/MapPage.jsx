@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"; //These are core map components from React Leaflet. I use MapContainer as the base map, TileLayer for the actual map visuals, and then Marker and Popup to place and describe each crime.
 import nycCrimeApi from "../../api/nycCrimeApi";
 import api from "../../api/api"; // backend Axios instance
@@ -43,7 +43,8 @@ export default function MapPage() {
           $where: "latitude IS NOT NULL AND longitude IS NOT NULL", // Only get crimes that have map coordinates so we can show them on the map
 
           $select:
-            "cmplnt_num,boro_nm,rpt_dt,cmplnt_fr_dt,cmplnt_fr_tm,ofns_desc,law_cat_cd,crm_atpt_cptd_cd,prem_typ_desc,loc_of_occur_desc,vic_age_group,vic_race,vic_sex,latitude,longitude",
+            "cmplnt_num,boro_nm,rpt_dt,ofns_desc,law_cat_cd,crm_atpt_cptd_cd,prem_typ_desc,loc_of_occur_desc,station_name,transit_district,hadevelopt,vic_sex,vic_age_group,vic_race,susp_sex,susp_age_group,susp_race,latitude,longitude",
+
           // Only grab specific fields we actually need (Theres more field in the bottom of this page with the descriptions)
 
           // Basically i’m asking the NYC API: give me 500 recent crimes that have coordinates and only send me the info I actually need.
@@ -88,64 +89,163 @@ export default function MapPage() {
       });
   };
 
-  const fetchedComments = (area) => {
+  const fetchComments = (area) => {
     api
-      .get(`/commnets${area}`)
+      .get(`/comments/${area}`)
       .then((res) => setComments(res.data))
       .catch((err) =>
         console.error("There was an error fetching the comments", err)
       );
   };
 
-  return (
-    <div className="map-wrapper">
-      <h1>🗺️ NYC Crime Map 🗽</h1>
+  const mapRef = useRef();
 
-      {loading ? ( // Ternary statement.
-        <p>Loading Map..</p> // If the data hasn’t loaded yet, just show ‘Loading Map…’. Otherwise, render the interactive map.”
-      ) : (
-        <MapContainer // Using Leaflet’s MapContainer and setting it to center on NYC with a moderate zoom level.
-          center={[40.7128, -74.006]} // Sets the map to New York City coordinates
-          zoom={12} // Controls how zoomed in the map starts
-          scrollWheelZoom={true} // Enables zooming with the mouse scroll wheel
-        >
-          <TileLayer // This pulls in the map background from OpenStreetMap, like how Google Maps loads its visual layers.
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' // attribution: legally required credit
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" // defines how Leaflet pulls map visuals based on zoom level and position
-          />
-          {crimes.map(
-            (
-              crime // This loops through every crime in the crimes state.
-            ) => (
-              <Marker
-                // For each crime that was loaded, lets place a marker on the map at the correct GPS coordinates.
-                key={crime.cmplnt_num}
-                position={[
-                  parseFloat(crime.latitude), //  adds a marker (pin) on the map for each one using its latitude and longitude.
-                  parseFloat(crime.longitude),
-                ]}
+  return (
+    <>
+      <h1 className="map-title">🗺️ NYC Crime Map 🗽</h1>
+
+      <div className="map-page-layout">
+        {/* === Sidebar for Comments === */}
+        <div className="comment-sidebar">
+          <h2>Anonymus Community Comments 🗣️</h2>
+          <div className="borough-list">
+            {["Bronx", "Manhattan", "Brooklyn", "Queens", "Staten Island"].map(
+              (boro) => (
+                <button
+                  key={boro}
+                  onClick={() => {
+                    setSelectedBorough(boro);
+                    fetchComments(boro);
+                  }}
+                  className={selectedBorough === boro ? "active" : ""}
+                >
+                  {boro}
+                </button>
+              )
+            )}
+          </div>
+
+          <div className="comment-list">
+            {comments.map((c) => (
+              <div
+                key={c._id}
+                className="comment-item"
+                onClick={() => {
+                  if (c.latitude && c.longitude && mapRef.current) {
+                    mapRef.current.setView([c.latitude, c.longitude], 16);
+                  }
+                }}
               >
-                <Popup>
-                  {" "}
-                  {/* This is what shows when a user clicks a pin on the map*/}
-                  <strong>{crime.ofns_desc}</strong>
-                  <br />
-                  {crime.prem_typ_desc}
-                  <br />
-                  {/* Displays borough and just the date */}
-                  {crime.boro_nm} — {crime.rpt_dt?.slice(0, 10)}
-                  <br />
-                  {crime.crm_atpt_cptd_cd}
-                  <button onClick={() => handleBookmark(crime)}>
-                    📌 Bookmark This
-                  </button>
-                </Popup>
-              </Marker>
-            )
-          )}
-        </MapContainer>
-      )}
-    </div>
+                <p>{c.text}</p>
+                <small>{c.area}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {loading ? ( // Ternary statement.
+          <p>Loading Map..</p> // If the data hasn’t loaded yet, just show ‘Loading Map…’. Otherwise, render the interactive map.”
+        ) : (
+          <MapContainer // Using Leaflet’s MapContainer and setting it to center on NYC with a moderate zoom level.
+            ref={mapRef}
+            center={[40.7128, -74.006]} // Sets the map to New York City coordinates
+            zoom={12} // Controls how zoomed in the map starts
+            scrollWheelZoom={true} // Enables zooming with the mouse scroll wheel
+          >
+            <TileLayer // This pulls in the map background from OpenStreetMap, like how Google Maps loads its visual layers.
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' // attribution: legally required credit
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" // defines how Leaflet pulls map visuals based on zoom level and position
+            />
+            {crimes.map(
+              (
+                crime // This loops through every crime in the crimes state.
+              ) => (
+                <Marker
+                  // For each crime that was loaded, lets place a marker on the map at the correct GPS coordinates.
+                  key={crime.cmplnt_num}
+                  position={[
+                    parseFloat(crime.latitude), //  adds a marker (pin) on the map for each one using its latitude and longitude.
+                    parseFloat(crime.longitude),
+                  ]}
+                >
+                  <Popup>
+                    <strong>{crime.ofns_desc}</strong> {/* Offense */}
+                    <br />
+                    <em>Category:</em> {crime.law_cat_cd}
+                    <br />
+                    <em>Status:</em> {crime.crm_atpt_cptd_cd}{" "}
+                    {/* Completed or Attempted */}
+                    <br />
+                    <em>Location:</em> {crime.prem_typ_desc} —{" "}
+                    {crime.loc_of_occur_desc}
+                    <br />
+                    <em>Borough:</em> {crime.boro_nm}
+                    <br />
+                    <em>Reported:</em> {crime.rpt_dt?.slice(0, 10)}
+                    <br />
+                    {crime.station_name && (
+                      <>
+                        <em>Nearby Station:</em> {crime.station_name}
+                        <br />
+                      </>
+                    )}
+                    {crime.hadevelopt && (
+                      <>
+                        <em>Housing Development:</em> {crime.hadevelopt}
+                        <br />
+                      </>
+                    )}
+                    <em>Victim:</em> {crime.vic_sex}, {crime.vic_age_group},{" "}
+                    {crime.vic_race}
+                    <br />
+                    <em>Suspect:</em> {crime.susp_sex || "Unknown"},{" "}
+                    {crime.susp_age_group || "Unknown"},{" "}
+                    {crime.susp_race || "Unknown"}
+                    <br />
+                    <br />
+                    <button onClick={() => handleBookmark(crime)}>
+                      📌 Bookmark This
+                    </button>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        api
+                          .post("/comments", {
+                            area: crime.boro_nm,
+                            text: commentText,
+                            latitude: parseFloat(crime.latitude),
+                            longitude: parseFloat(crime.longitude),
+                          })
+
+                          .then(() => {
+                            setCommentText("");
+                            setSelectedBorough(crime.boro_nm);
+                            fetchComments(crime.boro_nm);
+                          })
+                          .catch((err) =>
+                            console.error(
+                              "There was an error posting the comment",
+                              err
+                            )
+                          );
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Add a comment"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                      />
+                      <button type="submit">💬</button>
+                    </form>
+                  </Popup>
+                </Marker>
+              )
+            )}
+          </MapContainer>
+        )}
+      </div>
+    </>
   );
 }
 
