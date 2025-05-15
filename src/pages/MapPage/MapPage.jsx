@@ -29,6 +29,7 @@ export default function MapPage() {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [selectedBorough, setSelectedBorough] = useState(""); // Tracks where user clicked
+  const [selectedBoroughFilter, setSelectedBoroughFilter] = useState("All");
 
   useEffect(() => {
     nycCrimeApi // making a GET request using the custom Axios instance (nycCrimeApi)
@@ -36,7 +37,7 @@ export default function MapPage() {
         params: {
           // where we pass query parameters using SoQL (Socrata Query Language) to control the data
 
-          $limit: 500, // Only grab 500 rows (1000 started making everything go slow)
+          $limit: 1000, // Only grab 500 rows (1000 started making everything go slow)
 
           $order: "rpt_dt DESC", // Sort by report date, newest first
 
@@ -98,12 +99,38 @@ export default function MapPage() {
       );
   };
 
+  
+
   const mapRef = useRef();
 
+ const filteredCrimes =
+  selectedBoroughFilter === "All"
+    ? crimes
+    : crimes.filter(
+        (c) =>
+          c.boro_nm &&
+          c.boro_nm.toLowerCase() === selectedBoroughFilter.toLowerCase()
+      );
+
+
   return (
+    
     <>
       <h1 className="map-title">🗺️ NYC Crime Map 🗽</h1>
-
+<div className="boro-filter">
+  <label>Filter by Borough:</label>
+  <select
+    value={selectedBoroughFilter}
+    onChange={(e) => setSelectedBoroughFilter(e.target.value)}
+  >
+    <option value="All">All</option>
+    <option value="Bronx">Bronx</option>
+    <option value="Manhattan">Manhattan</option>
+    <option value="Brooklyn">Brooklyn</option>
+    <option value="Queens">Queens</option>
+    <option value="Staten Island">Staten Island</option>
+  </select>
+</div>
       <div className="map-page-layout">
         {/* === Sidebar for Comments === */}
         <div className="comment-sidebar">
@@ -142,10 +169,13 @@ export default function MapPage() {
             ))}
           </div>
         </div>
-
-        {loading ? ( // Ternary statement.
-          <p>Loading Map..</p> // If the data hasn’t loaded yet, just show ‘Loading Map…’. Otherwise, render the interactive map.”
+{loading ? (
+  <>
+    {/* If the data hasn’t loaded yet, just show ‘Loading Map…’. */}
+    <p>Loading Map...</p>
+  </>
         ) : (
+          
           <MapContainer // Using Leaflet’s MapContainer and setting it to center on NYC with a moderate zoom level.
             ref={mapRef}
             center={[40.7128, -74.006]} // Sets the map to New York City coordinates
@@ -156,10 +186,8 @@ export default function MapPage() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' // attribution: legally required credit
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" // defines how Leaflet pulls map visuals based on zoom level and position
             />
-            {crimes.map(
-              (
-                crime // This loops through every crime in the crimes state.
-              ) => (
+          {filteredCrimes.map(crime => (
+                
                 <Marker
                   // For each crime that was loaded, lets place a marker on the map at the correct GPS coordinates.
                   key={crime.cmplnt_num}
