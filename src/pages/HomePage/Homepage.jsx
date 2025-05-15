@@ -18,6 +18,14 @@ export default function Homepage() {
   <li>🔍 Insights coming soon!</li>
 </ul>
 
+<p className = "coming-soon">
+  🔧 More features coming soon — including crime heatmaps, filters by time, and advanced insights.
+</p>
+
+<p className ="personal-branding">
+  Built by Jose Bautista as part of a full-stack capstone project — 2025.
+</p>
+
     </div>
   );
 }
