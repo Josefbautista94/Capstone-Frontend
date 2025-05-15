@@ -26,6 +26,10 @@ export default function MapPage() {
 
   const [loading, setLoading] = useState(true); //  Tracking whether the app is still fetching the data. It starts as true, and I turn it off when the crime data is ready.
 
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]);
+  const [selectedBorough, setSelectedBorough] = useState(""); // Tracks where user clicked
+
   useEffect(() => {
     nycCrimeApi // making a GET request using the custom Axios instance (nycCrimeApi)
       .get("", {
@@ -39,7 +43,8 @@ export default function MapPage() {
           $where: "latitude IS NOT NULL AND longitude IS NOT NULL", // Only get crimes that have map coordinates so we can show them on the map
 
           $select:
-            "cmplnt_num,boro_nm,rpt_dt,ofns_desc,law_cat_cd,crm_atpt_cptd_cd,prem_typ_desc,latitude,longitude", // Only grab specific fields we actually need (Theres more field in the bottom of this page with the descriptions)
+            "cmplnt_num,boro_nm,rpt_dt,cmplnt_fr_dt,cmplnt_fr_tm,ofns_desc,law_cat_cd,crm_atpt_cptd_cd,prem_typ_desc,loc_of_occur_desc,vic_age_group,vic_race,vic_sex,latitude,longitude",
+          // Only grab specific fields we actually need (Theres more field in the bottom of this page with the descriptions)
 
           // Basically i’m asking the NYC API: give me 500 recent crimes that have coordinates and only send me the info I actually need.
         },
@@ -70,7 +75,8 @@ export default function MapPage() {
       .post("bookmarks", payload) // Sends a POST request to your backend at /api/bookmarks with the data we just built
       .then(() => alert("🔖 Bookmarked Successfully! 👍🏼")) // If the POST is successful, show a popup message to the user confirming it worked
       .catch((err) => {
-        if (err.response?.status === 409) { // 409 Conflict: means the crime is already in your database, cmplntNum is unique
+        if (err.response?.status === 409) {
+          // 409 Conflict: means the crime is already in your database, cmplntNum is unique
           alert("You already bookmarked this.");
         } else {
           console.error(
@@ -80,6 +86,15 @@ export default function MapPage() {
           alert("Failed to bookmark.");
         }
       });
+  };
+
+  const fetchedComments = (area) => {
+    api
+      .get(`/commnets${area}`)
+      .then((res) => setComments(res.data))
+      .catch((err) =>
+        console.error("There was an error fetching the comments", err)
+      );
   };
 
   return (
