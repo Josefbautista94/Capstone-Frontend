@@ -1,60 +1,107 @@
 import { useEffect, useState } from "react";
-import api from "../../api/api";// Axios helper
+import api from "../../api/api"; // backend Axios instance
+import "./BookmarksPage.css"; // Custom styling
 
-export default function BookmarksPage() {
-  const [bookmarks, setBookmarks] = useState([]); //bookmarks, the current state value (an array of bookmarks)
-  // setBookmarks is the function to update the state, this starts off as an empty array []
+export default function BookmarksPage() { // defining a react functional component and exporting it
+  const [bookmarks, setBookmarks] = useState([]); // bookmarks holds the array of saved crimes from the backend
+  const [editingNoteId, setEditingNoteId] = useState(null); // Which bookmark we're editing
+  const [noteText, setNoteText] = useState(""); // The live text for editing
 
   useEffect(() => {
-    // React hook that lets you run side effects in my component
-    fetchBookmarks(); // This calls the function that sends a GET request to the backend
-  }, []); // Only run this effect once, when the component first mounts aka loads
-
-  const fetchBookmarks = () => {
+    // When the component loads, we fetch all the bookmarked crimes from the backend API
     api
-      .get("/bookmarks") //  trying to send a GET request to your backend route at : http://localhost:5001/api/bookmarks
-      .then((res) => setBookmarks(res.data)) // When the GET request is successful we get access to res.data(the array of bookmarks), and we set the bookmarks state to that data
-      .catch(
-        (
-          err // If there's an error (e.g. server is down, wrong URL), this catches it
-        ) => console.error("There was an error fetching the bookmarks:", err) // log a message + the actual error
+      .get("/bookmarks")
+      .then((res) => setBookmarks(res.data))
+      .catch((err) =>
+        console.error("There was an error fetching the bookmarks:", err)
+      );
+  }, []);
+
+  const handleDelete = (id) => {
+    // When a user clicks ‘Delete,’ we call the backend to delete that specific bookmark by its _id
+    api
+      .delete(`/bookmarks/${id}`)
+      .then(() => {
+        // After deleting, update the UI by removing the deleted item from state
+        setBookmarks((prev) => prev.filter((b) => b._id !== id));
+      })
+      .catch((err) =>
+        console.error("There was an error deleting the bookmark:", err)
       );
   };
 
-  const handleDelete = (id) => {
-    // _id of the bookmark that I want to delete
+  const handleSaveNote = (id) => {
+    // Sends the PUT request to update just the note field
     api
-      .delete(`/bookmarks/${id}`) // This sends a DELETE request to the backend using Axios
-      // If id = "661b123haha", the request goes to: http://localhost:5001/api/bookmarks/661b123haha
-      .then(() => {
-        setBookmarks((prev) => prev.filter((b) => b._id !== id)); // Removes from UI, prev is the previous state of bookmarks (an array), .filter() creates a new array that: Keeps every bookmark except the one with the matching _id.
+      .put(`/bookmarks/${id}`, { notes: noteText })
+      .then((res) => {
+        // Update local state with the edited bookmark
+        setBookmarks((prev) =>
+          prev.map((b) => (b._id === id ? res.data : b))
+        );
+        setEditingNoteId(null);
+        setNoteText("");
       })
-      .catch((err) => console.error("Error deleting bookmark:", err));
+      .catch((err) =>
+        console.error("Error updating note:", err)
+      );
   };
 
   return (
-    <div>
-      <h1>📍 Saved Bookmarks </h1>
-      <ul>
-        {bookmarks.map(
-          (
-            b // .map() loops through the bookmarks array, For each bookmark (b), it creates an <li>
-          ) => (
-            <li key={b._id}>
-              {" "}
-              {/* Each bookmark becomes a list item, the key={b._id} is a React requirement when mapping over arrays*/}
-              <strong>{b.ofnsDesc}</strong> - {b.boroNm}
-              {/*Inside each <li>, we're rendering: The offense description in bold (e.g., "ROBBERY") - then the borough name (e.g., "QUEENS")*/}
-              <button
-                onClick={() => handleDelete(b._id)} // When this button is clicked, call handleDelete() and pass in the ID of this specific bookmark.
-                style={{ marginLeft: "10px" }}
-              >
-                Delete 🗑️
+    <div className="bookmarks-container">
+      <h1>📍 Saved Bookmarks</h1>
+      {bookmarks.length === 0 ? (
+        <p>No bookmarks yet.</p>
+      ) : (
+        <div className="bookmark-grid">
+          {bookmarks.map((b) => (
+            <div key={b._id} className="bookmark-card">
+              <h3>{b.ofnsDesc || "Unknown Offense"}</h3>
+              <p><strong>Category:</strong> {b.lawCatCd || "N/A"}</p>
+              <p><strong>Status:</strong> {b.crmAtptCptdCd || "N/A"}</p>
+              <p>
+                <strong>Location:</strong> {b.premTypDesc || "Unknown"} —{" "}
+                {b.locOfOccurDesc || "N/A"}
+              </p>
+              <p><strong>Borough:</strong> {b.boroNm || "Unknown"}</p>
+              <p><strong>Reported:</strong> {b.rptDt?.slice(0, 10) || "Unknown"}</p>
+              {b.stationName && <p><strong>Nearby Station:</strong> {b.stationName}</p>}
+              {b.hadevelopt && <p><strong>Housing Development:</strong> {b.hadevelopt}</p>}
+              <p><strong>Victim:</strong> {b.vicSex || "Unknown"}, {b.vicAgeGroup || "N/A"}, {b.vicRace || "N/A"}</p>
+              <p><strong>Suspect:</strong> {b.suspSex || "Unknown"}, {b.suspAgeGroup || "N/A"}, {b.suspRace || "N/A"}</p>
+
+              {editingNoteId === b._id ? (
+                <>
+                  <textarea
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    rows={3}
+                    style={{ width: "100%", marginTop: "0.5rem" }}
+                  />
+                  <div className="edit-buttons">
+                    <button onClick={() => handleSaveNote(b._id)}>💾 Save</button>
+                    <button onClick={() => setEditingNoteId(null)}>❌ Cancel</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p><strong>Notes:</strong> {b.notes || "None"}</p>
+                  <button onClick={() => {
+                    setEditingNoteId(b._id);
+                    setNoteText(b.notes || "");
+                  }}>
+                    ✏️ Edit Note
+                  </button>
+                </>
+              )}
+
+              <button onClick={() => handleDelete(b._id)} style={{ marginTop: "0.5rem" }}>
+                🗑️ Delete
               </button>
-            </li>
-          )
-        )}
-      </ul>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
