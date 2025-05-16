@@ -49,7 +49,7 @@ export default function BookmarksPage() { // defining a react functional compone
 
   return (
     <div className="bookmarks-container">
-      <h1>📍 Saved Bookmarks</h1>
+      <h1> 🔖 Saved Bookmarks</h1>
       {bookmarks.length === 0 ? (
         <p>No bookmarks yet.</p>
       ) : (

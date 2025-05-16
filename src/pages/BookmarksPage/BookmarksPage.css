@@ -50,3 +50,29 @@
     background-color: #ff3333;
   }
   
+  @media (max-width: 768px) {
+  .bookmarks-container {
+    padding: 1rem;
+  }
+
+  .bookmark-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .bookmark-card {
+    width: 90%;
+    padding: 1rem;
+  }
+
+  .bookmark-card p {
+    font-size: 0.9rem;
+  }
+
+  .bookmark-card button {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.95rem;
+  }
+}
