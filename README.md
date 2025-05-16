@@ -33,7 +33,7 @@ A full-stack web application that displays real-time crime data from the NYPD us
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 1. **Clone this repo**
 
