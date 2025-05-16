@@ -1,13 +1,65 @@
-# React + Vite
+# 🗽 NYC Crime Tracker — React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack web application that displays real-time crime data from the NYPD using the NYC Open Data API. Users can explore crimes on an interactive map, bookmark specific cases, and contribute anonymous comments. This project was built as a capstone for the Per Scholas Software Engineering program.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📌 Features
 
-## Expanding the ESLint configuration
+- 🔍 **Live Data View**: View recent crimes grouped by borough
+- 🗺️ **Interactive Map**: Visualize crime locations in NYC with Leaflet.js
+- 📌 **Bookmarking**: Save specific crimes to track later
+- 💬 **Community Comments**: Add anonymous location-based notes
+- 🧭 **Borough Filtering**: Focus on specific areas in the city
+- 🌙 **Dark Theme UI**: Built for readability and style
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# Capstone-Frontend
+---
+
+## ⚙️ Tech Stack
+
+**Frontend:**
+- React + Vite
+- React Leaflet (maps)
+- Axios
+- CSS Modules
+
+**Backend:**
+- Node.js + Express
+- MongoDB (via Mongoose)
+- RESTful API
+
+**Data Source:**
+- [NYC Open Data - NYPD Complaint Data (5uac-w243)](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243)
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone this repo**
+
+  
+   git clone https://github.com/Josefbautista94/Capstone-Frontend.git
+
+
+ 2. **Install dependencies**
+
+
+   
+ cd frontend
+npm install
+
+3. **Run the frontend**
+
+
+npm run dev
+
+4. (Optional) Start the backend in /backend directory.
+
+Link here : https://github.com/Josefbautista94/Capstone-Backend
+
+---
+
+## 📄 License
+
+This project is open source and free to use.
+
