@@ -94,3 +94,11 @@ A full-stack web application that displays real-time crime data from the NYPD us
 ##  License
 
 This project is open source and free to use.
+
+##  Resources Used
+
+- [NYC Open Data Portal](https://opendata.cityofnewyork.us/)
+- [Leaflet.js Docs](https://leafletjs.com/)
+- [React Leaflet Docs](https://react-leaflet.js.org/)
+- [Mongoose Docs](https://mongoosejs.com/)
+- [MDN Web Docs](https://developer.mozilla.org/)
