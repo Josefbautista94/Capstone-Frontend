@@ -72,6 +72,20 @@ export default function MapPage() {
       latitude: parseFloat(crime.latitude), // latitude & longitude: converted from strings to numbers using parseFloat()
       longitude: parseFloat(crime.longitude),
       notes: "", // could later build a form to let users add custom notes
+      crmAtptCptdCd: crime.crm_atpt_cptd_cd,
+      premTypDesc: crime.prem_typ_desc,
+      locOfOccurDesc: crime.loc_of_occur_desc,
+      rptDt: crime.rpt_dt,
+      stationName: crime.station_name,
+      hadevelopt: crime.hadevelopt,
+
+      vicSex: crime.vic_sex,
+      vicAgeGroup: crime.vic_age_group,
+      vicRace: crime.vic_race,
+
+      suspSex: crime.susp_sex,
+      suspAgeGroup: crime.susp_age_group,
+      suspRace: crime.susp_race,
     };
     api
       .post("bookmarks", payload) // Sends a POST request to your backend at /api/bookmarks with the data we just built
@@ -99,38 +113,34 @@ export default function MapPage() {
       );
   };
 
-  
-
   const mapRef = useRef();
 
- const filteredCrimes =
-  selectedBoroughFilter === "All"
-    ? crimes
-    : crimes.filter(
-        (c) =>
-          c.boro_nm &&
-          c.boro_nm.toLowerCase() === selectedBoroughFilter.toLowerCase()
-      );
-
+  const filteredCrimes =
+    selectedBoroughFilter === "All"
+      ? crimes
+      : crimes.filter(
+          (c) =>
+            c.boro_nm &&
+            c.boro_nm.toLowerCase() === selectedBoroughFilter.toLowerCase()
+        );
 
   return (
-    
     <>
       <h1 className="map-title">🗺️ NYC Crime Map 🗽</h1>
-<div className="boro-filter">
-  <label>Filter by Borough:</label>
-  <select
-    value={selectedBoroughFilter}
-    onChange={(e) => setSelectedBoroughFilter(e.target.value)}
-  >
-    <option value="All">All</option>
-    <option value="Bronx">Bronx</option>
-    <option value="Manhattan">Manhattan</option>
-    <option value="Brooklyn">Brooklyn</option>
-    <option value="Queens">Queens</option>
-    <option value="Staten Island">Staten Island</option>
-  </select>
-</div>
+      <div className="boro-filter">
+        <label>Filter by Borough:</label>
+        <select
+          value={selectedBoroughFilter}
+          onChange={(e) => setSelectedBoroughFilter(e.target.value)}
+        >
+          <option value="All">All</option>
+          <option value="Bronx">Bronx</option>
+          <option value="Manhattan">Manhattan</option>
+          <option value="Brooklyn">Brooklyn</option>
+          <option value="Queens">Queens</option>
+          <option value="Staten Island">Staten Island</option>
+        </select>
+      </div>
       <div className="map-page-layout">
         {/* === Sidebar for Comments === */}
         <div className="comment-sidebar">
@@ -169,13 +179,12 @@ export default function MapPage() {
             ))}
           </div>
         </div>
-{loading ? (
-  <>
-    {/* If the data hasn’t loaded yet, just show ‘Loading Map…’. */}
-    <p>Loading Map...</p>
-  </>
+        {loading ? (
+          <>
+            {/* If the data hasn’t loaded yet, just show ‘Loading Map…’. */}
+            <p>Loading Map...</p>
+          </>
         ) : (
-          
           <MapContainer // Using Leaflet’s MapContainer and setting it to center on NYC with a moderate zoom level.
             ref={mapRef}
             center={[40.7128, -74.006]} // Sets the map to New York City coordinates
@@ -186,90 +195,88 @@ export default function MapPage() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' // attribution: legally required credit
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" // defines how Leaflet pulls map visuals based on zoom level and position
             />
-          {filteredCrimes.map(crime => (
-                
-                <Marker
-                  // For each crime that was loaded, lets place a marker on the map at the correct GPS coordinates.
-                  key={crime.cmplnt_num}
-                  position={[
-                    parseFloat(crime.latitude), //  adds a marker (pin) on the map for each one using its latitude and longitude.
-                    parseFloat(crime.longitude),
-                  ]}
-                >
-                  <Popup>
-                    <strong>{crime.ofns_desc}</strong> {/* Offense */}
-                    <br />
-                    <em>Category:</em> {crime.law_cat_cd}
-                    <br />
-                    <em>Status:</em> {crime.crm_atpt_cptd_cd}{" "}
-                    {/* Completed or Attempted */}
-                    <br />
-                    <em>Location:</em> {crime.prem_typ_desc} —{" "}
-                    {crime.loc_of_occur_desc}
-                    <br />
-                    <em>Borough:</em> {crime.boro_nm}
-                    <br />
-                    <em>Reported:</em> {crime.rpt_dt?.slice(0, 10)}
-                    <br />
-                    {crime.station_name && (
-                      <>
-                        <em>Nearby Station:</em> {crime.station_name}
-                        <br />
-                      </>
-                    )}
-                    {crime.hadevelopt && (
-                      <>
-                        <em>Housing Development:</em> {crime.hadevelopt}
-                        <br />
-                      </>
-                    )}
-                    <em>Victim:</em> {crime.vic_sex}, {crime.vic_age_group},{" "}
-                    {crime.vic_race}
-                    <br />
-                    <em>Suspect:</em> {crime.susp_sex || "Unknown"},{" "}
-                    {crime.susp_age_group || "Unknown"},{" "}
-                    {crime.susp_race || "Unknown"}
-                    <br />
-                    <br />
-                    <button onClick={() => handleBookmark(crime)}>
-                      📌 Bookmark This
-                    </button>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        api
-                          .post("/comments", {
-                            area: crime.boro_nm,
-                            text: commentText,
-                            latitude: parseFloat(crime.latitude),
-                            longitude: parseFloat(crime.longitude),
-                          })
+            {filteredCrimes.map((crime) => (
+              <Marker
+                // For each crime that was loaded, lets place a marker on the map at the correct GPS coordinates.
+                key={crime.cmplnt_num}
+                position={[
+                  parseFloat(crime.latitude), //  adds a marker (pin) on the map for each one using its latitude and longitude.
+                  parseFloat(crime.longitude),
+                ]}
+              >
+                <Popup>
+                  <strong>{crime.ofns_desc}</strong> {/* Offense */}
+                  <br />
+                  <em>Category:</em> {crime.law_cat_cd}
+                  <br />
+                  <em>Status:</em> {crime.crm_atpt_cptd_cd}{" "}
+                  {/* Completed or Attempted */}
+                  <br />
+                  <em>Location:</em> {crime.prem_typ_desc} —{" "}
+                  {crime.loc_of_occur_desc}
+                  <br />
+                  <em>Borough:</em> {crime.boro_nm}
+                  <br />
+                  <em>Reported:</em> {crime.rpt_dt?.slice(0, 10)}
+                  <br />
+                  {crime.station_name && (
+                    <>
+                      <em>Nearby Station:</em> {crime.station_name}
+                      <br />
+                    </>
+                  )}
+                  {crime.hadevelopt && (
+                    <>
+                      <em>Housing Development:</em> {crime.hadevelopt}
+                      <br />
+                    </>
+                  )}
+                  <em>Victim:</em> {crime.vic_sex}, {crime.vic_age_group},{" "}
+                  {crime.vic_race}
+                  <br />
+                  <em>Suspect:</em> {crime.susp_sex || "Unknown"},{" "}
+                  {crime.susp_age_group || "Unknown"},{" "}
+                  {crime.susp_race || "Unknown"}
+                  <br />
+                  <br />
+                  <button onClick={() => handleBookmark(crime)}>
+                    📌 Bookmark This
+                  </button>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      api
+                        .post("/comments", {
+                          area: crime.boro_nm,
+                          text: commentText,
+                          latitude: parseFloat(crime.latitude),
+                          longitude: parseFloat(crime.longitude),
+                        })
 
-                          .then(() => {
-                            setCommentText("");
-                            setSelectedBorough(crime.boro_nm);
-                            fetchComments(crime.boro_nm);
-                          })
-                          .catch((err) =>
-                            console.error(
-                              "There was an error posting the comment",
-                              err
-                            )
-                          );
-                      }}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Add a comment"
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                      />
-                      <button type="submit">💬</button>
-                    </form>
-                  </Popup>
-                </Marker>
-              )
-            )}
+                        .then(() => {
+                          setCommentText("");
+                          setSelectedBorough(crime.boro_nm);
+                          fetchComments(crime.boro_nm);
+                        })
+                        .catch((err) =>
+                          console.error(
+                            "There was an error posting the comment",
+                            err
+                          )
+                        );
+                    }}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Add a comment"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                    />
+                    <button type="submit">💬</button>
+                  </form>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
         )}
       </div>
