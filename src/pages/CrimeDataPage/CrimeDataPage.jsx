@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import nycCrimeApi from "../../api/nycCrimeApi"; // Custom Axios instance :)
+import "./CrimeDataPage.css";
 
 export default function CrimeDataPage() { // defining a react functional component and exporting it
   const [crimes, setCrimes] = useState([]); // crimes is an array to store the fetched arrest data, setCrimes is the function to update that array
@@ -14,34 +15,47 @@ export default function CrimeDataPage() { // defining a react functional compone
         $select: "cmplnt_num,boro_nm,rpt_dt,ofns_desc,law_cat_cd,crm_atpt_cptd_cd,prem_typ_desc,latitude,longitude"
       }
     })
-    
-    // This fetches the most recent 100 arrests, sorted by date (most recent first)
+
+    // This fetches the most recent 500 crimes, sorted by date (most recent first)
       .then((res) => setCrimes(res.data)) // If the request succeeds, we store it in crimes by calling setCrimes(res.data)
       .catch((err) => 
         console.error("There was an error fetching the data:", err) // if the request fails we log the error to the console
       )
-      .finally(() => setLoading(false)); // runs no matter what whether success or error, This set the loading to false so the UI knows that its done loading
+      .finally(() => setLoading(false)); // runs no matter what whether success or error, This sets loading to false so the UI knows it’s done loading
   }, []); // Runs once when the component mounts (because of [])
 
+  const groupedByBorough = crimes.reduce((acc, crime) => {
+    const boro = crime.boro_nm || "Unknown";
+    if (!acc[boro]) acc[boro] = [];
+    acc[boro].push(crime);
+    return acc;
+  }, {});
 
- return (
-    <div>
-      <h1>📊 Live NYC Arrest Data</h1>
-      {loading ? ( // If loading is true, show <p>Loading...</p>. Otherwise, show the list of crimes.
-        <p>Loading...</p>
-      ) : (
-        <ul>
-          {crimes.map((crime, index) => ( //  loops through each arrest in your crimes array.
-          // Uses index as the React key 
-            <li key={index}> 
-              <strong>{crime.ofns_desc || "Unknown Offense"}</strong> —{" "} {/* displays the offense decription*/}
-              {crime.boro_nm || "Unknown Borough"} on{" "} {/* Shows the borough*/}
-              {crime.cmplnt_fr_dt?.slice(0, 10) || "Unknown Date"} {" "}{/* Displays the arrest date*/}
-              {crime.prem_typ_desc || "No Location Decription Avaliable"}
-            </li>
-          ))}
-        </ul>
-      )}
+  return (
+    <div className="crime-list-wrapper">
+      {Object.entries(groupedByBorough).map(([borough, crimes]) => (
+        <div key={borough} className="borough-section">
+          <h2>{borough}</h2>
+          <ul className="crime-list">
+            {crimes.map((crime, index) => (
+              <li
+                key={index}
+                className="crime-card"
+                style={{ cursor: "default" }}
+              >
+                <h3>{crime.ofns_desc || "Unknown Offense"}</h3>
+                <p><strong>Category:</strong> {crime.law_cat_cd || "N/A"}</p>
+                <p><strong>Status:</strong> {crime.crm_atpt_cptd_cd || "N/A"}</p>
+                <p>
+                  <strong>Location:</strong> {crime.prem_typ_desc || "Unknown"} — {crime.loc_of_occur_desc || "N/A"}
+                </p>
+                <p><strong>Borough:</strong> {crime.boro_nm || "Unknown"}</p>
+                <p><strong>Reported:</strong> {crime.rpt_dt?.slice(0, 10) || "Unknown Date"}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import "./HomePage.css"
 
-export default function Homepage() {
+export default function HomePage() {
   return (
     <div className="home-container">
       <h1>🗽 Welcome to NYC Crime Tracker</h1>
