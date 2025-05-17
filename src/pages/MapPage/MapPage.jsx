@@ -26,10 +26,10 @@ export default function MapPage() {
 
   const [loading, setLoading] = useState(true); //  Tracking whether the app is still fetching the data. It starts as true, and I turn it off when the crime data is ready.
 
-  const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState(""); // Holds the text value of the comment input field as the user types
+  const [comments, setComments] = useState([]); // Stores the list of all fetched comments for the selected borough
   const [selectedBorough, setSelectedBorough] = useState(""); // Tracks where user clicked
-  const [selectedBoroughFilter, setSelectedBoroughFilter] = useState("All");
+  const [selectedBoroughFilter, setSelectedBoroughFilter] = useState("All"); // Tracks the currently selected borough filter from the dropdown
 
   useEffect(() => {
     nycCrimeApi // making a GET request using the custom Axios instance (nycCrimeApi)
@@ -59,42 +59,48 @@ export default function MapPage() {
       .finally(() => setLoading(false)); // No matter what (success or fail), this runs at the end
   }, []);
 
+  // Handles bookmarking a specific crime when the user clicks "Bookmark This"
   const handleBookmark = (crime) => {
-    // When a user clicks ‘Bookmark This,’ I pass in that specific crime object to this function.
+    // Build the payload object using fields from the selected crime
+    // This object must match the structure your backend expects in /api/bookmarks
     const payload = {
-      // This creates the data object we're going to send to the backend.
-      // Each field maps to what the /api/bookmarks backend expects:
-      cmplntNum: crime.cmplnt_num, // cmplntNum comes directly from the crime object
-      boroNm: crime.boro_nm,
-      ofnsDesc: crime.ofns_desc,
-      lawCatCd: crime.law_cat_cd,
-      pdDesc: "N/A", // not included in the public API data, so we just send "N/A" for now
-      latitude: parseFloat(crime.latitude), // latitude & longitude: converted from strings to numbers using parseFloat()
-      longitude: parseFloat(crime.longitude),
-      notes: "", // could later build a form to let users add custom notes
-      crmAtptCptdCd: crime.crm_atpt_cptd_cd,
-      premTypDesc: crime.prem_typ_desc,
-      locOfOccurDesc: crime.loc_of_occur_desc,
-      rptDt: crime.rpt_dt,
-      stationName: crime.station_name,
-      hadevelopt: crime.hadevelopt,
+      cmplntNum: crime.cmplnt_num, // Unique crime ID
+      boroNm: crime.boro_nm, // Borough name
+      ofnsDesc: crime.ofns_desc, // Offense description
+      lawCatCd: crime.law_cat_cd, // Law category (e.g., FELONY)
+      pdDesc: "N/A", // Not provided by API, so we use a placeholder
+      latitude: parseFloat(crime.latitude), // Convert to number for DB storage
+      longitude: parseFloat(crime.longitude), // Convert to number for DB storage
+      notes: "", // Empty for now; could support custom notes later
+      crmAtptCptdCd: crime.crm_atpt_cptd_cd, // Attempted or Completed
+      premTypDesc: crime.prem_typ_desc, // Premise type (e.g., STREET, RESIDENCE)
+      locOfOccurDesc: crime.loc_of_occur_desc, // More detail about where the crime occurred
+      rptDt: crime.rpt_dt, // Reported date
+      stationName: crime.station_name, // Nearby subway station (if present)
+      hadevelopt: crime.hadevelopt, // Housing development (if applicable)
 
-      vicSex: crime.vic_sex,
-      vicAgeGroup: crime.vic_age_group,
-      vicRace: crime.vic_race,
+      vicSex: crime.vic_sex, // Victim gender
+      vicAgeGroup: crime.vic_age_group, // Victim age range
+      vicRace: crime.vic_race, // Victim race
 
-      suspSex: crime.susp_sex,
-      suspAgeGroup: crime.susp_age_group,
-      suspRace: crime.susp_race,
+      suspSex: crime.susp_sex, // Suspect gender
+      suspAgeGroup: crime.susp_age_group, // Suspect age range
+      suspRace: crime.susp_race, // Suspect race
     };
+
+    // Send the crime data to the backend to save it as a bookmark
     api
-      .post("bookmarks", payload) // Sends a POST request to your backend at /api/bookmarks with the data we just built
-      .then(() => alert("🔖 Bookmarked Successfully! 👍🏼")) // If the POST is successful, show a popup message to the user confirming it worked
+      .post("bookmarks", payload)
+      .then(() => {
+        // On success, notify the user that the crime was bookmarked
+        alert("🔖 Bookmarked Successfully! 👍🏼");
+      })
       .catch((err) => {
+        // If the backend responds with a 409, that means this crime was already bookmarked
         if (err.response?.status === 409) {
-          // 409 Conflict: means the crime is already in your database, cmplntNum is unique
           alert("You already bookmarked this.");
         } else {
+          // Log unexpected errors and notify the user
           console.error(
             "There was an error trying to bookmark the crime:",
             err
@@ -104,17 +110,22 @@ export default function MapPage() {
       });
   };
 
+  // Fetches all comments for a specific borough (area) from the backend
   const fetchComments = (area) => {
     api
-      .get(`/comments/${area}`)
-      .then((res) => setComments(res.data))
+      .get(`/comments/${area}`) // Sends a GET request to /api/comments/:area
+      .then((res) => setComments(res.data)) // On success, update the comments state with the response data
       .catch((err) =>
+        // Log any errors that occur during the request
         console.error("There was an error fetching the comments", err)
       );
   };
 
   const mapRef = useRef();
 
+  // Filters the list of crimes based on the selected borough
+  // If "All" is selected, return the full list of crimes
+  // Otherwise, return only crimes that match the selected borough (case-insensitive)
   const filteredCrimes =
     selectedBoroughFilter === "All"
       ? crimes
@@ -205,46 +216,57 @@ export default function MapPage() {
                 ]}
               >
                 <Popup>
-                  <strong>{crime.ofns_desc}</strong> {/* Offense */}
+                  {/* Display the crime's offense type prominently */}
+                  <strong>{crime.ofns_desc}</strong>
                   <br />
+                  {/* Show the legal category (e.g., FELONY, MISDEMEANOR) */}
                   <em>Category:</em> {crime.law_cat_cd}
                   <br />
-                  <em>Status:</em> {crime.crm_atpt_cptd_cd}{" "}
-                  {/* Completed or Attempted */}
+                  {/* Indicates if the crime was completed or attempted */}
+                  <em>Status:</em> {crime.crm_atpt_cptd_cd}
                   <br />
+                  {/* Display the premise type and specific location of occurrence */}
                   <em>Location:</em> {crime.prem_typ_desc} —{" "}
                   {crime.loc_of_occur_desc}
                   <br />
+                  {/* Show which borough the crime took place in */}
                   <em>Borough:</em> {crime.boro_nm}
                   <br />
+                  {/* Display the date the crime was reported (first 10 characters = YYYY-MM-DD) */}
                   <em>Reported:</em> {crime.rpt_dt?.slice(0, 10)}
                   <br />
+                  {/* Optional: Show nearby subway station if available */}
                   {crime.station_name && (
                     <>
                       <em>Nearby Station:</em> {crime.station_name}
                       <br />
                     </>
                   )}
+                  {/* Optional: Show public housing development if applicable */}
                   {crime.hadevelopt && (
                     <>
                       <em>Housing Development:</em> {crime.hadevelopt}
                       <br />
                     </>
                   )}
+                  {/* Victim demographic info */}
                   <em>Victim:</em> {crime.vic_sex}, {crime.vic_age_group},{" "}
                   {crime.vic_race}
                   <br />
+                  {/* Suspect demographic info, with fallbacks if data is missing */}
                   <em>Suspect:</em> {crime.susp_sex || "Unknown"},{" "}
                   {crime.susp_age_group || "Unknown"},{" "}
                   {crime.susp_race || "Unknown"}
                   <br />
                   <br />
+                  {/* Button to bookmark this crime, triggers handleBookmark() */}
                   <button onClick={() => handleBookmark(crime)}>
                     📌 Bookmark This
                   </button>
+                  {/* Comment form: allows user to leave an anonymous comment tied to this location */}
                   <form
                     onSubmit={(e) => {
-                      e.preventDefault();
+                      e.preventDefault(); // Prevent page reload
                       api
                         .post("/comments", {
                           area: crime.boro_nm,
@@ -252,8 +274,8 @@ export default function MapPage() {
                           latitude: parseFloat(crime.latitude),
                           longitude: parseFloat(crime.longitude),
                         })
-
                         .then(() => {
+                          // Clear input and refresh comments for this borough
                           setCommentText("");
                           setSelectedBorough(crime.boro_nm);
                           fetchComments(crime.boro_nm);
@@ -266,12 +288,15 @@ export default function MapPage() {
                         );
                     }}
                   >
+                    {/* Input field for comment text */}
                     <input
                       type="text"
                       placeholder="Add a comment"
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                     />
+
+                    {/* Submit button to post the comment */}
                     <button type="submit">💬</button>
                   </form>
                 </Popup>

@@ -11,20 +11,20 @@ export default function HomePage() {
       </p>
 
       <ul className="feature-list">
-  <li>📊 Live crime data from NYC Open Data</li>
+  <li>📊 Crime data from NYC Open Data which gets updated bi-weekly</li>
   <li>🗺️ Interactive map with borough filters</li>
-  <li>📌 Bookmark crimes you want to track</li>
+  <li>🔖 Bookmark crimes you want to track</li>
   <li>💬 Drop anonymous comments by location</li>
   <li>🔍 Insights coming soon!</li>
 </ul>
 
 <p className = "coming-soon">
-  🔧 More features coming soon — including crime heatmaps, filters by time, and advanced insights.
+   More features coming soon — including crime heatmaps, filters by time, and advanced insights.
 </p>
 
-<p className ="personal-branding">
+{/* <p className ="personal-branding">
   Built by Jose Bautista as part of a full-stack capstone project — 2025.
-</p>
+</p> */}
 
     </div>
   );
