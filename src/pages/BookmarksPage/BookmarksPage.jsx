@@ -47,61 +47,83 @@ export default function BookmarksPage() { // defining a react functional compone
       );
   };
 
-  return (
-    <div className="bookmarks-container">
-      <h1> 🔖 Saved Bookmarks</h1>
-      {bookmarks.length === 0 ? (
-        <p>No bookmarks yet.</p>
-      ) : (
-        <div className="bookmark-grid">
-          {bookmarks.map((b) => (
-            <div key={b._id} className="bookmark-card">
-              <h3>{b.ofnsDesc || "Unknown Offense"}</h3>
-              <p><strong>Category:</strong> {b.lawCatCd || "N/A"}</p>
-              <p><strong>Status:</strong> {b.crmAtptCptdCd || "N/A"}</p>
-              <p>
-                <strong>Location:</strong> {b.premTypDesc || "Unknown"} —{" "}
-                {b.locOfOccurDesc || "N/A"}
-              </p>
-              <p><strong>Borough:</strong> {b.boroNm || "Unknown"}</p>
-              <p><strong>Reported:</strong> {b.rptDt?.slice(0, 10) || "Unknown"}</p>
-              {b.stationName && <p><strong>Nearby Station:</strong> {b.stationName}</p>}
-              {b.hadevelopt && <p><strong>Housing Development:</strong> {b.hadevelopt}</p>}
-              <p><strong>Victim:</strong> {b.vicSex || "Unknown"}, {b.vicAgeGroup || "N/A"}, {b.vicRace || "N/A"}</p>
-              <p><strong>Suspect:</strong> {b.suspSex || "Unknown"}, {b.suspAgeGroup || "N/A"}, {b.suspRace || "N/A"}</p>
+ return (
+  // Main container for the saved bookmarks page
+  <div className="bookmarks-container">
+    <h1> 🔖 Saved Bookmarks</h1>
 
-              {editingNoteId === b._id ? (
-                <>
-                  <textarea
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                    rows={3}
-                    style={{ width: "100%", marginTop: "0.5rem" }}
-                  />
-                  <div className="edit-buttons">
-                    <button onClick={() => handleSaveNote(b._id)}>💾 Save</button>
-                    <button onClick={() => setEditingNoteId(null)}>❌ Cancel</button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p><strong>Notes:</strong> {b.notes || "None"}</p>
-                  <button onClick={() => {
-                    setEditingNoteId(b._id);
-                    setNoteText(b.notes || "");
-                  }}>
-                    ✏️ Edit Note
-                  </button>
-                </>
-              )}
+    {/* If there are no bookmarks yet, show a message */}
+    {bookmarks.length === 0 ? (
+      <p>No bookmarks yet.</p>
+    ) : (
+      // Otherwise, display the grid of bookmark cards
+      <div className="bookmark-grid">
+        {bookmarks.map((b) => (
+          // Render a card for each bookmark
+          <div key={b._id} className="bookmark-card">
+            <h3>{b.ofnsDesc || "Unknown Offense"}</h3>
+            <p><strong>Category:</strong> {b.lawCatCd || "N/A"}</p>
+            <p><strong>Status:</strong> {b.crmAtptCptdCd || "N/A"}</p>
+            <p>
+              <strong>Location:</strong> {b.premTypDesc || "Unknown"} —{" "}
+              {b.locOfOccurDesc || "N/A"}
+            </p>
+            <p><strong>Borough:</strong> {b.boroNm || "Unknown"}</p>
+            <p><strong>Reported:</strong> {b.rptDt?.slice(0, 10) || "Unknown"}</p>
 
-              <button onClick={() => handleDelete(b._id)} style={{ marginTop: "0.5rem" }}>
-                🗑️ Delete
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+            {/* Optional fields shown only if present */}
+            {b.stationName && (
+              <p><strong>Nearby Station:</strong> {b.stationName}</p>
+            )}
+            {b.hadevelopt && (
+              <p><strong>Housing Development:</strong> {b.hadevelopt}</p>
+            )}
+
+            {/* Victim and suspect demographics */}
+            <p><strong>Victim:</strong> {b.vicSex || "Unknown"}, {b.vicAgeGroup || "N/A"}, {b.vicRace || "N/A"}</p>
+            <p><strong>Suspect:</strong> {b.suspSex || "Unknown"}, {b.suspAgeGroup || "N/A"}, {b.suspRace || "N/A"}</p>
+
+            {/* If this bookmark is in edit mode, show the textarea and Save/Cancel buttons */}
+            {editingNoteId === b._id ? (
+              <>
+                <textarea
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  rows={3}
+                  style={{ width: "100%", marginTop: "0.5rem" }}
+                />
+                <div className="edit-buttons">
+                  {/* Save the updated note (calls PUT to backend) */}
+                  <button onClick={() => handleSaveNote(b._id)}>💾 Save</button>
+
+                  {/* Cancel editing */}
+                  <button onClick={() => setEditingNoteId(null)}>❌ Cancel</button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Show existing note if not in edit mode */}
+                <p><strong>Notes:</strong> {b.notes || "None"}</p>
+
+                {/* Enter edit mode for this bookmark */}
+                <button onClick={() => {
+                  setEditingNoteId(b._id);
+                  setNoteText(b.notes || "");
+                }}>
+                  ✏️ Edit Note
+                </button>
+              </>
+            )}
+
+            {/* Delete the bookmark (calls DELETE to backend) */}
+            <button onClick={() => handleDelete(b._id)} style={{ marginTop: "0.5rem" }}>
+              🗑️ Delete
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 }

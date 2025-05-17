@@ -32,9 +32,10 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/crime" onClick={() => setIsOpen(false)}>
-            Live Data
+            <Link to="/map" onClick={() => setIsOpen(false)}>
+            Map
           </Link>
+         
         </li>
         <li>
           <Link to="/bookmarks" onClick={() => setIsOpen(false)}>
@@ -42,8 +43,8 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link to="/map" onClick={() => setIsOpen(false)}>
-            Map
+          <Link to="/crime" onClick={() => setIsOpen(false)}>
+            Live Data
           </Link>
         </li>
         <li>
