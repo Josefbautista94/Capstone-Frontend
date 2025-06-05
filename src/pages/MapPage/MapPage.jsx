@@ -311,7 +311,7 @@ export default function MapPage() {
 
 /*
 ========================
-📌 NYC Crime API Fields
+📌 NYC Crime API Fields📌
 ========================
 Field                  | Meaning
 ---------------------- | ------------------------------------------------------------
